@@ -1023,7 +1023,7 @@ defmodule Explorer.Chain.Transaction do
     from(
       t in subquery(query),
       order_by: [desc: t.block_number, desc: t.index],
-      preload: [:from_address, :to_address, :created_contract_address, :block]
+      preload: [:from_address, :to_address, :created_contract_address]
     )
   end
 
@@ -1044,7 +1044,7 @@ defmodule Explorer.Chain.Transaction do
     from(
       t in subquery(query),
       order_by: [desc: t.block_number, desc: t.index],
-      preload: [:from_address, :to_address, :created_contract_address, :block]
+      preload: [:from_address, :to_address, :created_contract_address]
     )
   end
 
