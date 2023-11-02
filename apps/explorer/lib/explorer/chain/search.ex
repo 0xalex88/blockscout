@@ -20,6 +20,7 @@ defmodule Explorer.Chain.Search do
   alias Explorer.Chain.{
     Address,
     Block,
+    DenormalizationHelper,
     SmartContract,
     Token,
     Transaction
@@ -336,36 +337,68 @@ defmodule Explorer.Chain.Search do
   end
 
   defp search_tx_query(term) do
-    case Chain.string_to_transaction_hash(term) do
-      {:ok, tx_hash} ->
-        from(transaction in Transaction,
-          left_join: block in Block,
-          on: transaction.block_hash == block.hash,
-          where: transaction.hash == ^tx_hash,
-          select: %{
-            address_hash: fragment("CAST(NULL AS bytea)"),
-            tx_hash: transaction.hash,
-            block_hash: fragment("CAST(NULL AS bytea)"),
-            type: "transaction",
-            name: ^nil,
-            symbol: ^nil,
-            holder_count: ^nil,
-            inserted_at: transaction.inserted_at,
-            block_number: 0,
-            icon_url: nil,
-            token_type: nil,
-            timestamp: block.timestamp,
-            verified: nil,
-            exchange_rate: nil,
-            total_supply: nil,
-            circulating_market_cap: nil,
-            priority: 0,
-            is_verified_via_admin_panel: nil
-          }
-        )
+    if DenormalizationHelper.denormalization_finished?() do
+      case Chain.string_to_transaction_hash(term) do
+        {:ok, tx_hash} ->
+          from(transaction in Transaction,
+            where: transaction.hash == ^tx_hash,
+            select: %{
+              address_hash: fragment("CAST(NULL AS bytea)"),
+              tx_hash: transaction.hash,
+              block_hash: fragment("CAST(NULL AS bytea)"),
+              type: "transaction",
+              name: ^nil,
+              symbol: ^nil,
+              holder_count: ^nil,
+              inserted_at: transaction.inserted_at,
+              block_number: 0,
+              icon_url: nil,
+              token_type: nil,
+              timestamp: transaction.block_timestamp,
+              verified: nil,
+              exchange_rate: nil,
+              total_supply: nil,
+              circulating_market_cap: nil,
+              priority: 0,
+              is_verified_via_admin_panel: nil
+            }
+          )
 
-      _ ->
-        nil
+        _ ->
+          nil
+      end
+    else
+      case Chain.string_to_transaction_hash(term) do
+        {:ok, tx_hash} ->
+          from(transaction in Transaction,
+            left_join: block in Block,
+            on: transaction.block_hash == block.hash,
+            where: transaction.hash == ^tx_hash,
+            select: %{
+              address_hash: fragment("CAST(NULL AS bytea)"),
+              tx_hash: transaction.hash,
+              block_hash: fragment("CAST(NULL AS bytea)"),
+              type: "transaction",
+              name: ^nil,
+              symbol: ^nil,
+              holder_count: ^nil,
+              inserted_at: transaction.inserted_at,
+              block_number: 0,
+              icon_url: nil,
+              token_type: nil,
+              timestamp: block.timestamp,
+              verified: nil,
+              exchange_rate: nil,
+              total_supply: nil,
+              circulating_market_cap: nil,
+              priority: 0,
+              is_verified_via_admin_panel: nil
+            }
+          )
+
+        _ ->
+          nil
+      end
     end
   end
 
