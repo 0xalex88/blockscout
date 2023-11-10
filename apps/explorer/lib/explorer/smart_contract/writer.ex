@@ -3,8 +3,8 @@ defmodule Explorer.SmartContract.Writer do
   Generates smart-contract transactions
   """
 
-  alias Explorer.Chain
   alias Explorer.Chain.{Hash, SmartContract}
+  alias Explorer.Chain.SmartContract.Proxy
   alias Explorer.SmartContract.Helper
 
   @spec write_functions(SmartContract.t()) :: [%{}]
@@ -21,7 +21,7 @@ defmodule Explorer.SmartContract.Writer do
 
   @spec write_functions_proxy(Hash.t() | String.t()) :: [%{}]
   def write_functions_proxy(implementation_address_hash_string, options \\ []) do
-    implementation_abi = Chain.get_implementation_abi(implementation_address_hash_string, options)
+    implementation_abi = Proxy.get_implementation_abi(implementation_address_hash_string, options)
 
     case implementation_abi do
       nil ->
